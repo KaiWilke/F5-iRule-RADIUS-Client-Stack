@@ -1,14 +1,14 @@
 # About
 
-The included TCL-PreCompiler of the RADIUS Client Stack optimizes during a `RULE_INIT` event the run-time `$variable` names of the RADIUS Client Processor. 
+The included TCL-PreCompiler of the RADIUS Client Stack optimizes during a `RULE_INIT` event the run-time used `$RadCLI(array_label)` names of the RADIUS Client Processor. 
 
 The samples below outlining different Variable Compression Modes of the TCL-PreCompiler and explaining their pros and cons.
 
 # Mode 1: Disable Variable Compression
 
-If you disable the variable compression option within the PreCompiler settings (via `set RadCLI_compiler(compression_enable) 0`), the TCL-PreCompiler won't change the rather long but human friendly `$radcli(array_label)` variable names during the `RULE_INIT` event.
+If you disable the variable compression option within the PreCompiler settings (via `set RadCLI_compiler(compression_enable) 0`), the TCL-PreCompiler won't change the rather long but human friendly `$RadCLI(array_label)` variable names during the `RULE_INIT` event.
 
-The performance of the RADIUS Client Stack will be slightly degrated because the creation, maintenance and lockup of those rather long `$radcli(array_label)` variable names requires additional CPU cycles. The benefit of this mode is a simplyfied development and iRule debugging. You will always know what the purpose of those human friendly `$radcli(rich_array_label_text)` variables are - within your code and when a TCL-Stack-Trace happens.  
+The performance of the RADIUS Client Stack will be slightly degrated because the creation, maintenance and lockup of those rather long `$RadCLI(array_label)` variable names requires additional CPU cycles. The benefit of this mode is a simplyfied development and iRule debugging. You will always know what the purpose of those human friendly `$RadCLI(array_label)` variables are - within your code and when a TCL-Stack-Trace happens.  
 
 ### Disabled PreCompiler Compression Results:
 
@@ -40,13 +40,13 @@ if { [string length $client_request(password)] == 16 } then {
 
 # Mode 2: Enable Variable Compression with "unique" mappings
 
-If you enable the included variable compression option within the PreCompiler settings (via `set RadCLI_compiler(compression_enable) 1`), the TCL-PreCompiler will change the rather long and human friendly `$radcli(array_label)` variable names to shrinked variable names (e.g. `$rc(al)`) during the `RULE_INIT` event. 
+If you enable the included variable compression option within the PreCompiler settings (via `set RadCLI_compiler(compression_enable) 1`), the TCL-PreCompiler will change the rather long and human friendly `$RadCLI(array_label)` variable names to shrinked variable names (e.g. `$rc(al)`) during the `RULE_INIT` event. 
 
-The performance of the RADIUS Client Stack will be slightly optimized because the creation, maintenance and lockup of those short variable name requires less CPU cycles and memory. The downside of this mode is a more difficult iRule debugging because the code you write and the executed code is different. If a TCL stack trace happens, you may need to use the compression map to become able to translate the short run-time varible names back to their long form to spot the problem in the code you write. 
+The performance of the RADIUS Client Stack will be slightly optimized because the creation, maintenance and lockup of those short variable name requires less CPU cycles and memory. The downside of this mode is a more difficult iRule debugging experience, because the code you write and the executed code is now different. If a TCL stack trace happens, you may need to use the compression map to become able to translate the short run-time varible names back to their long form to spot the problem in the code you write. But in the end this should not a big deal...
 
 ### "unique" PreCompiler Compression Map:
 
-The compression map of this mode is sorted in alphabetical order where each human friendly variable is getting trunkated to a short but still unique human abbreviation. The variable name which are getting exposed to custom iRule solutions (e.g. `server_config()`, `client_request()` and `server_response()` are not compressed. 
+The compression map of this mode is sorted in alphabetical order where each human friendly variable is getting trunkated to a short and unique abbreviation. The variable name which are getting exposed to custom iRule solutions (e.g. `server_config()`, `client_request()` and `server_response()` are not compressed. 
 
 ```
 
@@ -144,17 +144,17 @@ if { [string length $client_request(password)] == 16 } then {
 
 You may use the experimental "shared" compression mode by replacing the default "unique" compression map at the bottom of the provided TCL PreCompiler section with a "shared" compression map that optimizes the run-time executed code to its maximum. 
 
-The "shared" compression map consolidates one or more rather long and human friendly `$radcli(array_label)` variable names to a combined single letter name variable (e.g. `${1}`) to reduce the total number of `$variable` creations, the required time to lookup a given `$variable` and the memory footprint of all used `$variables` to an absolute minimum.
+The "shared" compression map consolidates one or more rather long and human friendly `$RadCLI(array_label)` variable names to a combined single letter variable name (e.g. `${1}`) to reduce the total number of variable creations, the required time to lookup a given variable and the memory footprint of all used variables to an absolute minimum.
 
-The downside of this mode is an absolute nightmarish iRule debugging experience. If a TCL stack trace happens an complains problems with lets say variable `${2}` you will most likely not be able to translate those shared variable names back to the rather long and human friendly `$radcli(array_label)` original variable name.
+The downside of this mode is an absolute nightmarish iRule debugging experience. If a TCL stack trace happens an complains problems with lets say variable `${2}` you will most likely not be able to translate those shared variable names back to the rather long and human friendly `$RadCLI(array_label)` original variable name. One or more different `$RadCLI(array_label)` variables may be mapped to the single letter variable name `${2}`. 
 
 ### "shared" PreCompiler Compression Map:
 
 The compression map of this mode is generated by reading and analyzing the original code of the RADIUS Client Processor from top to the button. 
 
-Whenever a `$radcli(array_label)` variable is used for the first time, it gets assigned the next free entry of a single letter pool (e.g. `$radcli(someting)` becomes `${1}` and `$radcli(someting_else)` becomes `${2}`). The usage of such single letter variable names is considered the most CPU and memory friendly choice.  
+Whenever a `$RadCLI(something)` variable is used for the first time, it gets assigned the next free entry of a single letter pool (e.g. `$RadCLI(someting)` becomes `${1}` and `$RadCLI(someting_else)` becomes `${2}`). The usage of such single letter variable names is considered the most CPU and memory friendly choice.  
 
-Whenever a given `$radcli(array_label)` variable is not used anymore till the end of RADIUS Client Processor (aka. it has done its job!), its reserved entry in the single letter pool will get released, so that the very next `$radcli(array_label)` variable used for the first time can reuse the already initialized single letter varibale. This approach would eleminate the need to create a new variable for each unique purpose (creation costs CPU and Memory) and also immediately free the memory used holding obsolete variable data (costs Memory if remains in the stack longer than needed) without manually releasing it (costs CPU to release it explicitly). 
+Whenever a given `$RadCLI(something)` variable is not used anymore till the end of RADIUS Client Processor (aka. it has done its job!), its reserved entry in the single letter pool will get released, so that the very next `$RadCLI(something_different)` variable used for the first time can reuse the already initialized single letter varibale of `${1}`. This approach would eleminate the need to create a new variable for each unique variable usecase (creation of variables costs CPU and Memory) and also immediately free the memory used to hold the now obsolete variable data (costs Memory if variable data remains in the stack longer than needed) without manually releasing it (costs CPU to release the data explicitly via `[unset]`). 
 
 Recycling of varibale names (respectivily their internal memory links within the TCL runtime) is therefor the key to optimize the last nimbles of an already highly optimized TCL code.
 
@@ -164,7 +164,7 @@ Recycling of varibale names (respectivily their internal memory links within the
 # Note: The variable names are sorted in the order of appearance and getting compressed to the next free entry of a single letter pool.
 #       If the variable is not used anymore, its number will be added back to the pool ready for reuse (cpu savings).
 #       If a variable had previously stored large amounts of data, the variable will be reused preferred (memory savings).
-#		Variable "a" and "b" are lappend'ed without initializing an empty value. A manual unset is required at the end of the script to support chained executions.
+#	Variable "a" and "b" are lappend'ed without initializing an empty value. A manual unset is required at the end of the script to support chained executions.
 
 lappend RadCLI_compiler(replace_map) \
 	" \]"						"\]"	\
