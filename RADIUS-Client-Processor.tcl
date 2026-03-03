@@ -17,15 +17,15 @@ when RULE_INIT {
 	set RadCLI_compiler(log_enable)               1        ;# Enable logging (0-1 Bolean)
 	set RadCLI_compiler(log_prefix)	              "RadCLI : \[virtual\] : "	;# Configure a common log-prefix. Escape TCL commands/variables to allow a execution/substitution during run-time.
 	set RadCLI_compiler(log_level)                4	       ;# Include the log-lines up to log-level (0-8 See description below)
-							   ;#	0			Emergency				Not used by this iRule
-							   ;#	1			Alert					Not used by this iRule
-							   ;# 	2			Critical				Not used by this iRule
-							   ;#	3			Error					Not used by this iRule
-							   ;#	4			Warning					Configuration Issues
-							   ;#	5			Notice					Accounting Information (Accept/Reject)
-							   ;#	6			Informational			Requests, responses and connection errors
-							   ;#	7			Debug					Only important debug messages
-							   ;#	8			Trace					Line-by-Line debug messages
+	                                                       ;#	0			Emergency				Not used by this iRule
+	                                                       ;#	1			Alert					Not used by this iRule
+	                                                       ;# 	2			Critical				Not used by this iRule
+	                                                       ;#	3			Error					Not used by this iRule
+	                                                       ;#	4			Warning					Configuration Issues
+	                                                       ;#	5			Notice					Accounting Information (Accept/Reject)
+	                                                       ;#	6			Informational			Requests, responses and connection errors
+	                                                       ;#	7			Debug					Only important debug messages
+	                                                       ;#	8			Trace					Line-by-Line debug messages
 
 	#
 	# Configuration of TCL script pre-compiler
