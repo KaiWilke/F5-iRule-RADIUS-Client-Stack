@@ -22,6 +22,9 @@ set server_config(address)	"192.168.0.1:1812"
 # RADIUS shared secret
 set server_config(shared_key)	"MySecureSharedKeyString"
 
+# Enforce Message Authenticatior Attribute usage
+set server_config(require_hmac) 	1
+
 # RADIUS response timeout in milliseconds
 set server_config(timeout)	5000
 
@@ -79,7 +82,7 @@ if { $server_response(message) eq "ACCEPT" } then {
 ***Note:** By storing the TCL code into global variables and executing them via TCLs `[eval]` command, it is possible to keep the calling iRule as well as the RADIUS Client Stack Processor in the same TCL execution level. This approach eliminates the need to map variables into/from a child execution level like regular `[call]` procedures would require. Compared to a `[call]` procedure, the `[eval]` based execution also adds less overhead, since it does not require any housekeeping’s to create and maintain a TCL child execution level. An interesting background information in regards to this approach is, that the second representation of the TCL scripts stored in the `$static::*` variables are getting [shimmered](http://wiki.tcl.tk/3033) on their first execution to bytecode. This behavior allows subsequent `[eval]` executions to reuse the already computed bytecode representation. Compared to in-line TCL code, the performance overhead of those consecutive `[eval]` executions are in the range of just a few CPU cycles and completely independent of the executed TCL script syntax and its size.*
 
 # Functionality of the RADIUS Server Configuration section
-The RADIUS Server configuration section is responsible to specify the RADIUS Server configuration and `SIDEBAND` connection specific timer values to control UDP retransmits and timeouts. The mandatory configuration settings include the destination of the RADIUS Request (via `$server_config(address)`), the RADIUS Shared-Key (via `$server_config(shared_key)`) and the RADIUS response timeout (via `$server_config(timeout)`) and a list-item containing timer values for UDP retransmit (via `$server_config(retransmits)`).
+The RADIUS Server configuration section is responsible to specify the RADIUS Server configuration and `SIDEBAND` connection specific timer values to control UDP retransmits and timeouts. The mandatory configuration settings include the destination of the RADIUS Request (via `$server_config(address)`), the RADIUS Shared-Key (via `$server_config(shared_key)`), a setting to enforce Message Authenticator Attributes (via $server_config(require_hmac)), the RADIUS response timeout (via `$server_config(timeout)`) and a list-item containing timer values for UDP retransmit (via `$server_config(retransmits)`).
 
 ***Note:** The destination could be either a `IPv4:Port` or `IPv6:Port` value or a Virtual Server name listening for RADIUS request and forwarding them to a redundant pool of RADIUS servers.* 
 
@@ -206,7 +209,12 @@ The following chapters are uses to describe development considerations as well a
 
 ## Security
 The RADIUS Client Stack has been designed, developed, and intensively tested to allow stable operations on mission critical and hostile LTM environments. 
+
 The RADIUS Client Stack supports the latest HMAC-based Message-Authenticator security mechanism and computes a collision free Request-Authenticator field to protect against known RADIUS Man-in-the-Middle (MitM) attacks. In addition, the received RADIUS response payload gets full parsed and verified via Response-Authenticator check in addition to HMAC-based Message-Authenticator attribute verifications (if attribute was sent by the server).
+
+The HMAC-based Message-Authenticator Attribute integration is based on the mechanics outlined in the RFC Draft “draft-ietf-radext-deprecating-radius-02” to mitigate RadiusBlast attacks.
+
+The Message-Authenticator-Attribute is always send by the RADIUS Client Stack as first attribute and the setting “$server_config(require_hmac) 1” enforces Message-Authenticator-Attribute usage for every received RADIUS response. 
 
 ## Performance
 The RADIUS Client Stack has been developed with a carefully chosen TCL syntax to be as much CPU / Memory friendly as possible. If you can provide ideas to further optimize the performance of the RADIUS Client Stack without limiting its usability or security, I would be very happy to get your feedback.
